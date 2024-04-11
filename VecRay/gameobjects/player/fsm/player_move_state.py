@@ -13,6 +13,7 @@ class Move(State):
     def __init__(self):
         super().__init__()
         self.current_segment_index = None
+        self.is_open_segment = True
 
     def on_update(self):
         player = self.fsm.owner
@@ -38,20 +39,26 @@ class Move(State):
 
         for i, (start, end) in enumerate(segments):
             # print(f"{current_position.x} - {start.x}  ---- {current_position.y} - {start.y}")
-            if self.are_segments_equal(current_position, start):
+            if self.are_points_equal(current_position, start):
                 self.current_segment_index = i
-                print(self.current_segment_index)
                 break
 
         if self.current_segment_index is not None:
             # If moving left and at the start of the segment, switch to the previous segment
-            if direction == "left" and self.are_segments_equal(current_position, segments[self.current_segment_index][0]):
-                self.current_segment_index = (self.current_segment_index - 1) % len(segments)
+            if direction == "left" and self.are_points_equal(current_position, segments[self.current_segment_index][0]):
+                if self.is_open_segment and self.current_segment_index == 0:
+                    return  # clamp if open
+                else:
+                    self.current_segment_index = (self.current_segment_index - 1) % len(segments)
 
             # If moving right and at the end of the segment, switch to the next segment
-            elif direction == "right" and self.are_segments_equal(current_position, segments[self.current_segment_index][1]):
-                self.current_segment_index = (self.current_segment_index + 1) % len(segments)
+            elif direction == "right" and self.are_points_equal(current_position, segments[self.current_segment_index][1]):
+                if self.is_open_segment and self.current_segment_index == len(segments) - 1:
+                    return  # clamp if open
+                else:
+                    self.current_segment_index = (self.current_segment_index + 1) % len(segments)
 
+            print(self.current_segment_index)
             # Calculate the next position based on the current segment
             start, end = segments[self.current_segment_index]
             x0 = start.x
@@ -90,5 +97,5 @@ class Move(State):
             game_object.x = new_x
             game_object.y = new_y
 
-    def are_segments_equal(self, a, b):
+    def are_points_equal(self, a, b):
         return a.x == b.x and a.y == b.y
