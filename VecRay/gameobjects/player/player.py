@@ -7,11 +7,12 @@ from gameobjects.player.fsm.player_move_state import Move
 
 class Player:
 
-    def __init__(self, x, y, size):
+    def __init__(self, x, y, size, segments):
         super().__init__()
         self.x = x
         self.y = y
         self.size = size
+        self.segments = segments
 
         self.fsm = FiniteStateMachine(self, [Move()])
         self.fsm.start()
@@ -25,6 +26,9 @@ class Player:
 
     @staticmethod
     def _draw_ship(x, y, size):
+        x = int(x)
+        y = int(y)
+        size = int(size)
         # Body
         rl.draw_line(x - size // 2, y - size // 2, x + size // 2, y - size // 2, rl.WHITE)  # Top
         rl.draw_line(x - size // 2, y + size // 2, x + size // 2, y + size // 2, rl.WHITE)  # Bottom
